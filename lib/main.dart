@@ -11,7 +11,12 @@ class Plan {
   DateTime date;
   bool isCompleted;
 
-  Plan({required this.name, required this.description, required this.date, this.isCompleted = false});
+  Plan({
+    required this.name,
+    required this.description,
+    required this.date,
+    this.isCompleted = false,
+  });
 }
 
 class AdoptionTravelApp extends StatelessWidget {
@@ -34,15 +39,9 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
   final List<Plan> _plans = [];
   DateTime _selectedDate = DateTime.now();
 
-  void _createPlan(String name, String description) {
+  void _createPlan(String name, String description, DateTime date) {
     setState(() {
-      _plans.add(Plan(name: name, description: description, date: _selectedDate));
-    });
-  }
-
-  void _markCompleted(int index) {
-    setState(() {
-      _plans[index].isCompleted = !_plans[index].isCompleted;
+      _plans.add(Plan(name: name, description: description, date: date));
     });
   }
 
@@ -65,7 +64,10 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
           TextButton(
             onPressed: () {
               if (nameController.text.isNotEmpty) {
-                _editPlanInList(index, nameController.text, descriptionController.text);
+                setState(() {
+                  _plans[index].name = nameController.text;
+                  _plans[index].description = descriptionController.text;
+                });
                 Navigator.pop(context);
               }
             },
@@ -76,16 +78,15 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
     );
   }
 
-  void _editPlanInList(int index, String newName, String newDescription) {
-    setState(() {
-      _plans[index].name = newName;
-      _plans[index].description = newDescription;
-    });
-  }
-
   void _deletePlan(int index) {
     setState(() {
       _plans.removeAt(index);
+    });
+  }
+
+  void _markCompleted(int index) {
+    setState(() {
+      _plans[index].isCompleted = !_plans[index].isCompleted;
     });
   }
 
@@ -102,15 +103,13 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
           children: [
             TextField(controller: nameController, decoration: InputDecoration(labelText: 'Name')),
             TextField(controller: descriptionController, decoration: InputDecoration(labelText: 'Description')),
-            SizedBox(height: 10),
-            Text("Selected Date: ${_selectedDate.toLocal()}"),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () {
               if (nameController.text.isNotEmpty) {
-                _createPlan(nameController.text, descriptionController.text);
+                _createPlan(nameController.text, descriptionController.text, _selectedDate);
                 Navigator.pop(context);
               }
             },
@@ -129,7 +128,6 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
       appBar: AppBar(title: Text('Adoption & Travel Plans')),
       body: Column(
         children: [
-          // Calendar Widget
           TableCalendar(
             firstDay: DateTime.utc(2020, 1, 1),
             lastDay: DateTime.utc(2030, 12, 31),
@@ -141,44 +139,43 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
               });
             },
           ),
-           child: DragTarget<Plan>(
+          Expanded(
+            child: DragTarget<Plan>(
               onAccept: (plan) {
                 setState(() {
                   plan.date = _selectedDate;
                 });
               },
-                GestureDetector(
-                onLongPress: () => _editPlan(index),
-                onDoubleTap: () => _deletePlan(index),
-                child: Dismissible(
-                key: Key(plan.hashCode.toString()),
-                onDismissed: (_) => _markCompleted(index),
-                background: Container(color: Colors.green),
-                child: ListTile(
-                  title: Text(plan.name),
-                  subtitle: Text(plan.description),
-                  tileColor: plan.isCompleted ? Colors.green[100] : Colors.red[100],
-                ),
-              ),
-            ),
-
-                  
-                  Draggable<Plan>(
-                  data: plan,
-                  feedback: Material(
-                    child: Container(
-                      color: Colors.blueAccent,
-                      padding: EdgeInsets.all(8.0),
-                      child: Text(plan.name, style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                  child: ListTile(
-                    title: Text(plan.name),
-                    subtitle: Text(plan.description),
-                    tileColor: plan.isCompleted ? Colors.green[100] : Colors.red[100],
-                  ),
-                ),
-
+              builder: (context, candidateData, rejectedData) {
+                return ListView.builder(
+                  itemCount: _filteredPlans.length,
+                  itemBuilder: (context, index) {
+                    final plan = _filteredPlans[index];
+                    return GestureDetector(
+                      onLongPress: () => _editPlan(index),
+                      onDoubleTap: () => _deletePlan(index),
+                      child: Dismissible(
+                        key: Key(plan.hashCode.toString()),
+                        onDismissed: (_) => _markCompleted(index),
+                        background: Container(color: Colors.green),
+                        child: Draggable<Plan>(
+                          data: plan,
+                          feedback: Material(
+                            child: Container(
+                              color: Colors.blueAccent,
+                              padding: EdgeInsets.all(8.0),
+                              child: Text(plan.name, style: TextStyle(color: Colors.white)),
+                            ),
+                          ),
+                          child: ListTile(
+                            title: Text(plan.name),
+                            subtitle: Text(plan.description),
+                            tileColor: plan.isCompleted ? Colors.green[100] : Colors.red[100],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ),
