@@ -49,13 +49,43 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
       _plans[index].isCompleted = !_plans[index].isCompleted;
     });
   }
+void _editPlan(int index) {
+  TextEditingController nameController = TextEditingController(text: _plans[index].name);
+  TextEditingController descriptionController = TextEditingController(text: _plans[index].description);
 
-  void _editPlan(int index, String newName, String newDescription) {
-    setState(() {
-      _plans[index].name = newName;
-      _plans[index].description = newDescription;
-    });
-  }
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Edit Plan'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(controller: nameController, decoration: InputDecoration(labelText: 'Name')),
+          TextField(controller: descriptionController, decoration: InputDecoration(labelText: 'Description')),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            if (nameController.text.isNotEmpty) {
+              _editPlanInList(index, nameController.text, descriptionController.text);
+              Navigator.pop(context);
+            }
+          },
+          child: Text('Save'),
+        ),
+      ],
+    ),
+  );
+}
+
+void _editPlanInList(int index, String newName, String newDescription) {
+  setState(() {
+    _plans[index].name = newName;
+    _plans[index].description = newDescription;
+  });
+}
+
 
   void _deletePlan(int index) {
     setState(() {
