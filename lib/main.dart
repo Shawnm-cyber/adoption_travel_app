@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
-
+import 'package:table_calendar/table_calendar.dart';
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Plan {
+  String name;
+  String description;
+  DateTime date;
+  bool isCompleted;
+
+  Plan({
+    required this.name,
+    required this.description,
+    required this.date,
+    this.isCompleted = false,
+  });
+}
 
   // This widget is the root of your application.
   @override
