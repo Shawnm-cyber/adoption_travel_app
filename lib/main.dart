@@ -141,22 +141,32 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
               });
             },
           ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _filteredPlans.length,
-              itemBuilder: (context, index) {
-                final plan = _filteredPlans[index];
+           child: DragTarget<Plan>(
+              onAccept: (plan) {
+                setState(() {
+                  plan.date = _selectedDate;
+                });
+              },
                 return Dismissible(
                   key: Key(plan.hashCode.toString()), // Ensure unique key
                   onDismissed: (_) => _deletePlan(index),
                   background: Container(color: Colors.red),
+                  Draggable<Plan>(
+                  data: plan,
+                  feedback: Material(
+                    child: Container(
+                      color: Colors.blueAccent,
+                      padding: EdgeInsets.all(8.0),
+                      child: Text(plan.name, style: TextStyle(color: Colors.white)),
+                    ),
+                  ),
                   child: ListTile(
                     title: Text(plan.name),
                     subtitle: Text(plan.description),
                     tileColor: plan.isCompleted ? Colors.green[100] : Colors.red[100],
-                    onLongPress: () => _editPlan(index),
-                    onTap: () => _markCompleted(index),
                   ),
+                ),
+
                 );
               },
             ),
