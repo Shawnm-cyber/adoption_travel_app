@@ -147,10 +147,22 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
                   plan.date = _selectedDate;
                 });
               },
-                return Dismissible(
-                  key: Key(plan.hashCode.toString()), // Ensure unique key
-                  onDismissed: (_) => _deletePlan(index),
-                  background: Container(color: Colors.red),
+                GestureDetector(
+                onLongPress: () => _editPlan(index),
+                onDoubleTap: () => _deletePlan(index),
+                child: Dismissible(
+                key: Key(plan.hashCode.toString()),
+                onDismissed: (_) => _markCompleted(index),
+                background: Container(color: Colors.green),
+                child: ListTile(
+                  title: Text(plan.name),
+                  subtitle: Text(plan.description),
+                  tileColor: plan.isCompleted ? Colors.green[100] : Colors.red[100],
+                ),
+              ),
+            ),
+
+                  
                   Draggable<Plan>(
                   data: plan,
                   feedback: Material(
