@@ -36,6 +36,7 @@ class PlanManagerScreen extends StatefulWidget {
 
 class _PlanManagerScreenState extends State<PlanManagerScreen> {
   final List<Plan> _plans = [];
+  DateTime _selectedDate = DateTime.now();
 
   void _createPlan(String name, String description, DateTime date) {
     setState(() {
@@ -66,7 +67,20 @@ class _PlanManagerScreenState extends State<PlanManagerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('Adoption & Travel Plans')),
-      body: ListView.builder(
+      body: Column(
+        children: [
+          // Calendar Widget
+          firstDay: DateTime.utc(2020, 1, 1),
+          lastDay: DateTime.utc(2030, 12, 31),
+          focusedDay: _selectedDate,
+          selectedDayPredicate: (day) => isSameDay(day, _selectedDate),
+          OnDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              _selectedDate = selectedDay;
+            });
+          },
+      ),
+        ].builder(
         itemCount: _plans.length,
         itemBuilder: (context, index) {
           final plan = _plans[index];
